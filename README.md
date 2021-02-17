@@ -3,7 +3,7 @@ An official Tauri plugin for using a yubikey in your Tauri App
 # Tauri Plugin Authenticator
 ![Test](https://github.com/tauri-apps/tauri-plugin-authenticator/workflows/Test/badge.svg)
 
-This plugin provides a "classical" Tauri Plugin Interface to the wonderful mozilla authenticator.rs
+This plugin provides a "classical" Tauri Plugin Interface to the wonderful mozilla [authenticator.rs](https://github.com/mozilla/authenticator-rs)
 
 ## Note:
 This plugin is currently written to comply with the pre-beta version of Tauri. It will change when the beta release candidate is published and is currently instable.
