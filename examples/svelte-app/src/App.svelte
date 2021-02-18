@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Authenticator } from 'tauri-plugin-authenticator-api'
 
-  const serverURL = 'http://localhost:3003/'
   const app = 'https://tauri.studio'
 
   const auth = new Authenticator()
@@ -9,27 +8,41 @@
   
   let challenge = ''
   let keyHandle = ''
+  let deviceName = ''
   let pubkey = ''
+  let clientData = ''
   let success = false
+
+  function genChallenge(): Promise<string> {
+    return new Promise((resolve,reject)=>{
+      var arr = new Uint8Array(32);
+      window.crypto.getRandomValues(arr)
+      resolve(btoa(String.fromCharCode.apply(null, arr)));
+    })
+  }
 
   async function register(){
     console.log('register!')
-    const r = await fetch(serverURL+'challenge')
-    const j = await r.json()
-    challenge = j.challenge
+    const chall = await genChallenge()
+    console.log("challenge!", chall)
+    challenge = chall
     try {
-      const registerData = await auth.register(challenge, app)
-      console.log('=> registerData:', registerData)
-      if(!r) return
-      const r2 = await fetch(serverURL+'register', {
-        method:'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({challenge, registerData})
-      })
-      const j2 = await r2.json()
-      console.log('=> /register result:', j2)
+      const json = await auth.register(challenge, app)
+      console.log('=> registerData:', json)
+      const registerResult = JSON.parse(json)
+      if(!registerResult.pubkey || !registerResult.keyHandle || !registerResult.clientData || !registerResult.registerData) {
+        return console.log("MISSING FIELDS IN REGISTER RESULT")
+      }
+      clientData = registerResult.clientData
+      const r2 = await auth.verifyRegistration(challenge, app, registerResult.registerData, registerResult.clientData)
+      console.log("R2", r2)
+      const j2 = JSON.parse(r2)
+      if(!j2.pubkey || !j2.keyHandle || !j2.deviceName) {
+        return console.log("MISSING FIELDS IN REGISTER VERIFICATION RESULT")
+      }
       keyHandle = j2.keyHandle
       pubkey = j2.pubkey
+      deviceName = j2.deviceName
     } catch(e) {
       console.log("ERROR registering:",e)
     }
@@ -37,16 +50,18 @@
 
   async function sign(){
     try {
-      const signData = await auth.sign(challenge, app, keyHandle)
-      console.log('=> signData:', signData)
-      const r = await fetch(serverURL+'verify', {
-        method:'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({challenge, signData, pubkey})
-      })
-      const j = await r.json()
-      console.log('=> sign result:', j)
-      if(j.success) success=true
+      const json = await auth.sign(challenge, app, keyHandle)
+      console.log('=> signData:', json)
+      const signData = JSON.parse(json)
+      if(!signData.signData || !signData.keyHandle) {
+        return console.log("MISSING FIELDS IN SIGN RESULT")
+      }
+
+      const counter = await auth.verifySignature(challenge, app, signData.signData, clientData, keyHandle, pubkey)
+      console.log(counter)
+      if(counter && counter>0) {
+        success=true
+      }
     } catch(e) {
       console.log("ERROR signing:",e)
     }
@@ -71,6 +86,8 @@
   </section>
   <br />
   <section>
+    <div>DEVICE NAME:</div>
+    <pre>{deviceName}</pre>
     <div>KEY HANDLE:</div>
     <pre>{keyHandle}</pre>
     <div>PUBLIC KEY:</div>

@@ -10,6 +10,7 @@ use std::{
 };
 use std::sync::mpsc::{channel};
 use std::{io};
+use serde_derive::{Serialize};
 
 static MANAGER: Lazy<Mutex<AuthenticatorService>> = Lazy::new(|| {
     let manager = AuthenticatorService::new().expect("The auth service should initialize safely");
@@ -24,9 +25,17 @@ pub fn init_usb() {
     manager.add_u2f_usb_hid_platform_transports();
 }
 
-// return key_handle:public_key
-pub fn register(timeout: u64, challenge: String, application: String) -> Result<String> {
-    let (chall_bytes, app_bytes) = format_client_data(challenge.as_str(), application.as_str());
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Registration {
+    pub key_handle: String,
+    pub pubkey: String,
+    pub register_data: String,
+    pub client_data: String,
+}
+
+pub fn register(application: String, timeout: u64, challenge: String) -> Result<String> {
+    let (chall_bytes, app_bytes, client_data_string) = format_client_data(application.as_str(), challenge.as_str());
 
     // log the status rx?
     let (status_tx, _status_rx) = channel::<StatusUpdate>();
@@ -66,17 +75,32 @@ pub fn register(timeout: u64, challenge: String, application: String) -> Result<
             let (key_handle, public_key) = _u2f_get_key_handle_and_public_key_from_register_response(&register_data).unwrap();
             let key_handle_base64 = base64::encode(&key_handle);
             let public_key_base64 = base64::encode(&public_key);
+            let register_data_base64 = base64::encode(&register_data);
             println!("Key Handle: {}", &key_handle_base64);
             println!("Public Key: {}", &public_key_base64);
 
-            //Ok(base64::encode(&register_data))
-            Ok(key_handle_base64)
+            // Ok(base64::encode(&register_data))
+            // Ok(key_handle_base64)
+            let res = serde_json::to_string(&Registration{
+                key_handle: key_handle_base64,
+                pubkey: public_key_base64,
+                register_data: register_data_base64,
+                client_data: client_data_string,
+            })?;
+            Ok(res)
         },
         Err(e)=> Err(e.into())
     }
 }
 
-pub fn sign(timeout: u64, challenge: String, application: String, key_handle: String) -> Result<String> {
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Signature {
+    pub key_handle: String,
+    pub sign_data: String,
+}
+
+pub fn sign(application: String, timeout: u64, challenge: String, key_handle: String) -> Result<String> {
     let credential = match base64::decode(&key_handle) {
         Ok(v)=>v,
         Err(e)=>{
@@ -88,7 +112,7 @@ pub fn sign(timeout: u64, challenge: String, application: String, key_handle: St
         transports: AuthenticatorTransports::empty(),
     };
 
-    let (chall_bytes, app_bytes) = format_client_data(challenge.as_str(), application.as_str());
+    let (chall_bytes, app_bytes, _) = format_client_data(application.as_str(), challenge.as_str());
 
     let (sign_tx, sign_rx) = channel();
     let callback = StateCallback::new(Box::new(move |rv| {
@@ -127,13 +151,18 @@ pub fn sign(timeout: u64, challenge: String, application: String, key_handle: St
             println!("Key handle used: {}", base64::encode(&handle_used));
             println!("Device info: {}", &device_info);
             println!("Done.");
-            Ok(sig)
+            
+            let res = serde_json::to_string(&Signature{
+                sign_data: sig,
+                key_handle: base64::encode(&handle_used),
+            })?;
+            Ok(res)
         },
         Err(e)=> Err(e.into())
     }
 }
 
-fn format_client_data(challenge: &str, application: &str) -> (Vec<u8>, Vec<u8>) {
+fn format_client_data(application: &str, challenge: &str) -> (Vec<u8>, Vec<u8>, String) {
     let d = format!(r#"{{"challenge": "{}", "version": "U2F_V2", "appId": "{}"}}"#, challenge, application);
     let mut challenge = Sha256::default();
     challenge.input(d.as_bytes());
@@ -143,7 +172,7 @@ fn format_client_data(challenge: &str, application: &str) -> (Vec<u8>, Vec<u8>) 
     app.input(application.as_bytes());
     let app_bytes = app.result().to_vec();
 
-    (chall_bytes, app_bytes)
+    (chall_bytes, app_bytes, d)
 }
 
 fn _u2f_get_key_handle_and_public_key_from_register_response(register_response: &[u8]) -> io::Result<(Vec<u8>, Vec<u8>)> {

@@ -1,9 +1,9 @@
 [package]
-name = "tauri-plugin-authenticator"
+name = "tauri-authenticator"
 version = "0.1.0"
 authors = ["Evan Feenstra <evanfeenstra@gmail.com>"]
 edition = "2018"
-exclude = ["/example", "/api-definitions"]
+exclude = ["/examples", "/webview-dist", "/webview-src", "node_modules"]
 
 [dependencies]
 tauri = "0.11"
@@ -11,10 +11,13 @@ authenticator = "0.3.1"
 once_cell = "1.5"
 serde = "1.0"
 serde_json = "1.0"
+serde_derive = "1.0"
 sha2 = "^0.8.2"
 async-std = { version = "1.9", features = ["attributes"] }
 base64 = { version = "^0.10" }
 anyhow = "1.0.38"
+u2f = "0.2"
+chrono = "0.4"
 
 [dev-dependencies]
 rand = "0.8"
