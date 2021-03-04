@@ -1,7 +1,7 @@
 use base64::{decode_config, encode_config, URL_SAFE_NO_PAD};
 use chrono::prelude::*;
 use serde_derive::Serialize;
-use std::{convert::Into};
+use std::convert::Into;
 use u2f::messages::*;
 use u2f::protocol::*;
 use u2f::register::*;

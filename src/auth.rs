@@ -2,13 +2,13 @@ use authenticator::{
     authenticatorservice::AuthenticatorService, statecallback::StateCallback,
     AuthenticatorTransports, KeyHandle, RegisterFlags, SignFlags, StatusUpdate,
 };
+use base64::{decode_config, encode_config, URL_SAFE_NO_PAD};
 use once_cell::sync::Lazy;
 use serde_derive::Serialize;
-use sha2::{Sha256, Digest};
+use sha2::{Digest, Sha256};
 use std::io;
 use std::sync::mpsc::channel;
 use std::{convert::Into, sync::Mutex};
-use base64::{encode_config, decode_config, URL_SAFE_NO_PAD};
 
 static MANAGER: Lazy<Mutex<AuthenticatorService>> = Lazy::new(|| {
     let manager = AuthenticatorService::new().expect("The auth service should initialize safely");
@@ -153,7 +153,10 @@ pub fn sign(
             let sig = encode_config(&sign_data, URL_SAFE_NO_PAD);
 
             println!("Sign result: {}", sig);
-            println!("Key handle used: {}", encode_config(&handle_used, URL_SAFE_NO_PAD));
+            println!(
+                "Key handle used: {}",
+                encode_config(&handle_used, URL_SAFE_NO_PAD)
+            );
             println!("Device info: {}", &device_info);
             println!("Done.");
 
