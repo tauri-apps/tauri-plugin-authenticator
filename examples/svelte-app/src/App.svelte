@@ -17,7 +17,9 @@
     return new Promise((resolve,reject)=>{
       var arr = new Uint8Array(32);
       window.crypto.getRandomValues(arr)
-      resolve(btoa(String.fromCharCode.apply(null, arr)));
+      const b64 = btoa(String.fromCharCode.apply(null, arr))
+      // web-safe base64
+      resolve(b64.replace(/\+/g, '-').replace(/\//g, '_'));
     })
   }
 
