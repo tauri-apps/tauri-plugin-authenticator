@@ -49,10 +49,10 @@ pub fn register(application: String, timeout: u64, challenge: String) -> Result<
     let res = manager.register(
         RegisterFlags::empty(),
         timeout,
-        chall_bytes.clone(),
-        app_bytes.clone(),
+        chall_bytes,
+        app_bytes,
         vec![],
-        status_tx.clone(),
+        status_tx,
         callback,
     );
 
@@ -209,10 +209,7 @@ fn _u2f_get_key_handle_and_public_key_from_register_response(
     let _attestation = key_handle.split_off(key_handle_len);
 
     // remove fist (reserved) and last (handle len) bytes
-    let pk: Vec<u8> = public_key[1..public_key.len() - 1]
-        .iter()
-        .cloned()
-        .collect();
+    let pk: Vec<u8> = public_key[1..public_key.len() - 1].to_vec();
 
     Ok((key_handle, pk))
 }

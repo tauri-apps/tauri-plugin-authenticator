@@ -8,7 +8,7 @@ use u2f::register::*;
 
 type Result<T> = std::result::Result<T, anyhow::Error>;
 
-static VERSION: &'static str = "U2F_V2";
+static VERSION: &str = "U2F_V2";
 
 pub fn make_challenge(app_id: &str, challenge_bytes: Vec<u8>) -> Challenge {
     let utc: DateTime<Utc> = Utc::now();
@@ -37,7 +37,7 @@ pub fn verify_registration(
     let challenge = make_challenge(&app_id, challenge_bytes);
     let client_data_bytes: Vec<u8> = client_data.as_bytes().into();
     let client_data_base64 = encode_config(&client_data_bytes, URL_SAFE_NO_PAD);
-    let client = U2f::new(app_id.into());
+    let client = U2f::new(app_id);
     match client.register_response(
         challenge,
         RegisterResponse {
@@ -78,7 +78,7 @@ pub fn verify_signature(
     let client_data_base64 = encode_config(&client_data_bytes, URL_SAFE_NO_PAD);
     let key_handle_bytes = decode_config(&key_handle, URL_SAFE_NO_PAD)?;
     let pubkey_bytes = decode_config(&pub_key, URL_SAFE_NO_PAD)?;
-    let client = U2f::new(app_id.into());
+    let client = U2f::new(app_id);
     let mut _counter: u32 = 0;
     match client.sign_response(
         chal,
@@ -93,7 +93,7 @@ pub fn verify_signature(
             // here needs client data and sig data and key_handle
             signature_data: sign_data,
             client_data: client_data_base64,
-            key_handle: key_handle,
+            key_handle,
         },
         _counter,
     ) {

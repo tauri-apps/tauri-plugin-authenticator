@@ -1,6 +1,5 @@
 mod auth;
 mod u2f;
-use base64::{decode_config, URL_SAFE_NO_PAD};
 
 use serde::Deserialize;
 
@@ -64,7 +63,10 @@ impl tauri::plugin::Plugin for TauriAuthenticator {
                     Init { callback, error } => {
                         tauri::execute_promise(
                             webview,
-                            move || Ok(auth::init_usb()),
+                            move || {
+                                auth::init_usb();
+                                Ok(())
+                            },
                             callback,
                             error,
                         );
