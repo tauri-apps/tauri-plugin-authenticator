@@ -1,27 +1,26 @@
 {
-    "name": "tauri-plugin-authenticator-api",
-    "version": "0.1.0",
-    "authors": [
-      "Evan Feenstra <evanfeenstra@gmail.com>",
-      "Daniel Thompson-Yvetot <denjell@tauri.studio>"
-    ],
-    "description": "API wrapper for the Tauri Authenticator plugin",
-    "browser": "webview-dist/index.js",
-    "scripts": {
-      "build": "rollup -c ./webview-src/rollup.config.js",
-      "prepublishOnly": "yarn build",
-      "pretest": "yarn build"
-    },
-    "license": "Apache-2.0",
-    "devDependencies": {
-      "@rollup/plugin-node-resolve": "^11.1.0",
-      "@rollup/plugin-typescript": "^8.1.0",
-      "rollup-plugin-terser": "^7.0.2",
-      "typescript": "^4.1.3"
-    },
-    "dependencies": {
-      "tauri": "^0.14.1",
-      "tslib": "^2.1.0"
-    }
+  "name": "tauri-plugin-authenticator-api",
+  "version": "0.1.0",
+  "authors": [
+    "Evan Feenstra <evanfeenstra@gmail.com>",
+    "Daniel Thompson-Yvetot <denjell@tauri.studio>"
+  ],
+  "description": "API wrapper for the Tauri Authenticator plugin",
+  "browser": "webview-dist/index.js",
+  "scripts": {
+    "build": "rollup -c ./webview-src/rollup.config.js",
+    "prepublishOnly": "yarn build",
+    "pretest": "yarn build"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^11.1.0",
+    "@rollup/plugin-typescript": "^8.1.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1.0.0-beta-rc.2",
+    "tslib": "^2.1.0"
   }
-  
+}

@@ -1,12 +1,12 @@
 [package]
-name = "tauri-authenticator"
+name = "tauri-plugin-authenticator"
 version = "0.1.0"
 authors = ["Evan Feenstra <evanfeenstra@gmail.com>"]
 edition = "2018"
 exclude = ["/examples", "/webview-dist", "/webview-src", "node_modules"]
 
 [dependencies]
-tauri = "0.11"
+tauri = { git = "https://github.com/tauri-apps/tauri", branch = "dev" }
 authenticator = "0.3.1"
 once_cell = "1.5"
 serde = "1.0"
