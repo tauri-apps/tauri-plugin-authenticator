@@ -1,156 +1,84 @@
 mod auth;
 mod u2f;
 
-use serde::Deserialize;
+use tauri::{plugin::Plugin, InvokeMessage, Params};
 
-pub struct TauriAuthenticator;
-
-#[derive(Deserialize)]
-#[serde(tag = "cmd")]
-enum AuthenticatorCmd {
-    Init {
-        callback: String,
-        error: String,
-    },
-    Register {
-        timeout: u64, // milliseconds
-        challenge: String,
-        application: String,
-        callback: String,
-        error: String,
-    },
-    VerifyRegistration {
-        challenge: String,
-        application: String,
-        #[serde(rename = "registerData")]
-        register_data: String,
-        #[serde(rename = "clientData")]
-        client_data: String,
-        callback: String,
-        error: String,
-    },
-    Sign {
-        timeout: u64, // milliseconds
-        challenge: String,
-        application: String,
-        #[serde(rename = "keyHandle")]
-        key_handle: String, // base64
-        callback: String,
-        error: String,
-    },
-    VerifySignature {
-        challenge: String,
-        application: String,
-        #[serde(rename = "signData")]
-        sign_data: String,
-        #[serde(rename = "clientData")]
-        client_data: String,
-        #[serde(rename = "keyHandle")]
-        key_handle: String, // base64
-        pubkey: String, // base64
-        callback: String,
-        error: String,
-    },
+#[tauri::command]
+fn init() -> Result<(), ()> {
+    auth::init_usb();
+    Ok(())
 }
 
-impl tauri::plugin::Plugin for TauriAuthenticator {
-    fn extend_api(&self, webview: &mut tauri::Webview<'_>, payload: &str) -> Result<bool, String> {
-        use AuthenticatorCmd::*;
-        match serde_json::from_str(payload) {
-            Err(e) => Err(e.to_string()),
-            Ok(command) => {
-                match command {
-                    Init { callback, error } => {
-                        tauri::execute_promise(
-                            webview,
-                            move || {
-                                auth::init_usb();
-                                Ok(())
-                            },
-                            callback,
-                            error,
-                        );
-                    }
-                    Register {
-                        timeout,
-                        challenge,
-                        application,
-                        callback,
-                        error,
-                    } => {
-                        tauri::execute_promise(
-                            webview,
-                            move || auth::register(application, timeout, challenge),
-                            callback,
-                            error,
-                        );
-                    }
-                    VerifyRegistration {
-                        challenge,
-                        application,
-                        register_data,
-                        client_data,
-                        callback,
-                        error,
-                    } => {
-                        tauri::execute_promise(
-                            webview,
-                            move || {
-                                u2f::verify_registration(
-                                    application,
-                                    challenge,
-                                    register_data,
-                                    client_data,
-                                )
-                            },
-                            callback,
-                            error,
-                        );
-                    }
-                    Sign {
-                        timeout,
-                        challenge,
-                        application,
-                        key_handle,
-                        callback,
-                        error,
-                    } => {
-                        tauri::execute_promise(
-                            webview,
-                            move || auth::sign(application, timeout, challenge, key_handle),
-                            callback,
-                            error,
-                        );
-                    }
-                    VerifySignature {
-                        challenge,
-                        application,
-                        sign_data,
-                        client_data,
-                        key_handle,
-                        pubkey,
-                        callback,
-                        error,
-                    } => {
-                        tauri::execute_promise(
-                            webview,
-                            move || {
-                                u2f::verify_signature(
-                                    application,
-                                    challenge,
-                                    sign_data,
-                                    client_data,
-                                    key_handle,
-                                    pubkey,
-                                )
-                            },
-                            callback,
-                            error,
-                        );
-                    }
-                };
-                Ok(true)
-            }
+#[tauri::command]
+fn register(timeout: u64, challenge: String, application: String) -> Result<String, String> {
+    auth::register(application, timeout, challenge).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn verify_registration(
+    challenge: String,
+    application: String,
+    register_data: String,
+    client_data: String,
+) -> Result<String, String> {
+    u2f::verify_registration(application, challenge, register_data, client_data)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn sign(
+    timeout: u64,
+    challenge: String,
+    application: String,
+    key_handle: String,
+) -> Result<String, String> {
+    auth::sign(application, timeout, challenge, key_handle).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn verify_signature(
+    challenge: String,
+    application: String,
+    sign_data: String,
+    client_data: String,
+    key_handle: String,
+    pubkey: String,
+) -> Result<u32, String> {
+    u2f::verify_signature(
+        application,
+        challenge,
+        sign_data,
+        client_data,
+        key_handle,
+        pubkey,
+    )
+    .map_err(|e| e.to_string())
+}
+
+pub struct TauriAuthenticator<M: Params> {
+    invoke_handler: Box<dyn Fn(InvokeMessage<M>) + Send + Sync>,
+}
+
+impl<M: Params> Default for TauriAuthenticator<M> {
+    fn default() -> Self {
+        Self {
+            invoke_handler: Box::new(tauri::generate_handler![
+                init,
+                register,
+                verify_registration,
+                sign,
+                verify_signature
+            ]),
         }
+    }
+}
+
+impl<M: Params> Plugin<M> for TauriAuthenticator<M> {
+    fn name(&self) -> &'static str {
+        "authenticator"
+    }
+
+    fn extend_api(&mut self, message: InvokeMessage<M>) {
+        (self.invoke_handler)(message)
     }
 }

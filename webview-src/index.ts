@@ -1,25 +1,21 @@
-import { promisified } from 'tauri/api/tauri'
+import { invoke } from '@tauri-apps/api/tauri'
 
 export class Authenticator {
 
     init(): Promise<void> {
-        return promisified({
-            cmd: 'Init',
-        })
+        return invoke('plugin:authenticator|init')
     }
 
     register(challenge: string, application: string): Promise<string> {
-        return promisified({
-            cmd: 'Register',
+        return invoke('plugin:authenticator|register', {
             timeout: 10000,
             challenge,
             application,
         })
     }
 
-    verifyRegistration(challenge: string, application: string, registerData: string, clientData: string) {
-        return promisified({
-            cmd: 'VerifyRegistration',
+    verifyRegistration(challenge: string, application: string, registerData: string, clientData: string): Promise<string> {
+        return invoke('plugin:authenticator|verify_registration', {
             challenge,
             application,
             registerData,
@@ -28,8 +24,7 @@ export class Authenticator {
     }
 
     sign(challenge: string, application: string, keyHandle: string): Promise<string> {
-        return promisified({
-            cmd: 'Sign',
+        return invoke('plugin:authenticator|sign', {
             timeout: 10000,
             challenge,
             application,
@@ -37,9 +32,8 @@ export class Authenticator {
         })
     }
 
-    verifySignature(challenge: string, application: string, signData: string, clientData: string, keyHandle: string, pubkey: string) {
-        return promisified({
-            cmd: 'VerifySignature',
+    verifySignature(challenge: string, application: string, signData: string, clientData: string, keyHandle: string, pubkey: string): Promise<number> {
+        return invoke('plugin:authenticator|verify_signature', {
             challenge,
             application,
             signData,
