@@ -1,7 +1,7 @@
 mod auth;
 mod u2f;
 
-use serde::{Deserialize};
+use serde::Deserialize;
 
 pub struct TauriAuthenticator;
 
@@ -50,85 +50,80 @@ enum AuthenticatorCmd {
         pubkey: String, // base64
         callback: String,
         error: String,
-    }
+    },
 }
 
 impl tauri::plugin::Plugin for TauriAuthenticator {
-
     fn extend_api(&self, webview: &mut tauri::Webview<'_>, payload: &str) -> Result<bool, String> {
         use AuthenticatorCmd::*;
         match serde_json::from_str(payload) {
             Err(e) => Err(e.to_string()),
             Ok(command) => {
                 match command {
-                    Init{
-                        callback,
-                        error
-                    }=> {
+                    Init { callback, error } => {
                         tauri::execute_promise(
                             webview,
                             move || {
-                                Ok(auth::init_usb())
+                                auth::init_usb();
+                                Ok(())
                             },
                             callback,
                             error,
                         );
                     }
-                    Register{
-                        timeout, 
-                        challenge, 
+                    Register {
+                        timeout,
+                        challenge,
                         application,
                         callback,
                         error,
-                    }=> {
+                    } => {
                         tauri::execute_promise(
                             webview,
-                            move || {
-                                auth::register(application, timeout, challenge)            
-                            },
+                            move || auth::register(application, timeout, challenge),
                             callback,
                             error,
                         );
                     }
-                    VerifyRegistration{
-                        challenge, 
+                    VerifyRegistration {
+                        challenge,
                         application,
                         register_data,
                         client_data,
                         callback,
                         error,
-                    }=> {
+                    } => {
                         tauri::execute_promise(
                             webview,
                             move || {
-                                let register_data_bytes = base64::decode(&register_data)?;
-                                let challenge_bytes = base64::decode(&challenge)?;
-                                let client_data_bytes = client_data.as_bytes().into();
-                                u2f::verify_registration(application, challenge_bytes, register_data_bytes, client_data_bytes)            
+                                u2f::verify_registration(
+                                    application,
+                                    challenge,
+                                    register_data,
+                                    client_data,
+                                )
                             },
                             callback,
                             error,
                         );
                     }
-                    Sign{
-                        timeout, 
-                        challenge, 
+                    Sign {
+                        timeout,
+                        challenge,
                         application,
                         key_handle,
                         callback,
-                        error
-                    }=> {
+                        error,
+                    } => {
                         tauri::execute_promise(
                             webview,
-                            move || {
-                                auth::sign(application, timeout, challenge, key_handle)
-                            },
+                            move || auth::sign(application, timeout, challenge, key_handle),
                             callback,
                             error,
                         );
                     }
-                    VerifySignature{
-                        challenge, 
+                    VerifySignature {
+                        challenge,
                         application,
                         sign_data,
                         client_data,
@@ -136,16 +131,18 @@ impl tauri::plugin::Plugin for TauriAuthenticator {
                         pubkey,
                         callback,
                         error,
-                    }=> {
+                    } => {
                         tauri::execute_promise(
                             webview,
                             move || {
-                                let register_data_bytes = base64::decode(&sign_data)?;
-                                let challenge_bytes = base64::decode(&challenge)?;
-                                let client_data_bytes = client_data.as_bytes().into();
-                                let key_handle_bytes = base64::decode(&key_handle)?;
-                                let pubkey_bytes = base64::decode(&pubkey)?;
-                                u2f::verify_signature(application, challenge_bytes, register_data_bytes, client_data_bytes, key_handle_bytes, pubkey_bytes)            
+                                u2f::verify_signature(
+                                    application,
+                                    challenge,
+                                    sign_data,
+                                    client_data,
+                                    key_handle,
+                                    pubkey,
+                                )
                             },
                             callback,
                             error,
@@ -156,5 +153,4 @@ impl tauri::plugin::Plugin for TauriAuthenticator {
             }
         }
     }
-
 }
