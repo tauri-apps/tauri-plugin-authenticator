@@ -1,5 +1,5 @@
 [package]
-name = "tauri-authenticator"
+name = "tauri-plugin-authenticator"
 version = "0.1.0"
 authors = ["Evan Feenstra <evanfeenstra@gmail.com>"]
 edition = "2018"

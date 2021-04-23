@@ -4,9 +4,8 @@ mod u2f;
 use tauri::{plugin::Plugin, InvokeMessage, Params};
 
 #[tauri::command]
-fn init() -> Result<(), ()> {
+fn init() {
     auth::init_usb();
-    Ok(())
 }
 
 #[tauri::command]
