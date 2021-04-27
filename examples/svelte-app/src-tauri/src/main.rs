@@ -3,7 +3,7 @@
   windows_subsystem = "windows"
 )]
 
-use tauri_authenticator::TauriAuthenticator;
+use tauri_plugin_authenticator::TauriAuthenticator;
 
 fn main() {
   tauri::Builder::default()
