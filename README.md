@@ -5,9 +5,6 @@ An official Tauri plugin for using a yubikey in your Tauri App
 
 This plugin provides a "classical" Tauri Plugin Interface to the wonderful mozilla [authenticator.rs](https://github.com/mozilla/authenticator-rs)
 
-## Note:
-This plugin is currently written to comply with the pre-beta version of Tauri. It will change when the beta release candidate is published and is currently instable.
-
 ## Architecture
 This repo shape might appear to be strange, but it is really just a hybrid Rust / Typescript project that recommends a specific type of consumption, namely using GIT as the secure distribution mechanism, and referencing specific unforgeable git hashes. Of course, it can also be consumed via Cargo and NPM.
 
