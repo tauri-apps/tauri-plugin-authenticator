@@ -1,7 +1,7 @@
 mod auth;
 mod u2f;
 
-use tauri::{plugin::Plugin, Invoke, Params};
+use tauri::{plugin::Plugin, Invoke, Runtime};
 
 #[tauri::command]
 fn init() {
@@ -54,11 +54,11 @@ fn verify_signature(
     .map_err(|e| e.to_string())
 }
 
-pub struct TauriAuthenticator<P: Params> {
-    invoke_handler: Box<dyn Fn(Invoke<P>) + Send + Sync>,
+pub struct TauriAuthenticator<R: Runtime> {
+    invoke_handler: Box<dyn Fn(Invoke<R>) + Send + Sync>,
 }
 
-impl<P: Params> Default for TauriAuthenticator<P> {
+impl<R: Runtime> Default for TauriAuthenticator<R> {
     fn default() -> Self {
         Self {
             invoke_handler: Box::new(tauri::generate_handler![
@@ -72,12 +72,12 @@ impl<P: Params> Default for TauriAuthenticator<P> {
     }
 }
 
-impl<P: Params> Plugin<P> for TauriAuthenticator<P> {
+impl<R: Runtime> Plugin<R> for TauriAuthenticator<R> {
     fn name(&self) -> &'static str {
         "authenticator"
     }
 
-    fn extend_api(&mut self, invoke: Invoke<P>) {
+    fn extend_api(&mut self, invoke: Invoke<R>) {
         (self.invoke_handler)(invoke)
     }
 }
