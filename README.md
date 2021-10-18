@@ -60,11 +60,11 @@ yarn add github:tauri-apps/tauri-plugin-authenticator-api#v0.1.0
 `package.json`
 ```json
   "dependencies": {
-    "tauri-plugin-authenticator-api": "tauri-apps/tauri-plugin-authenticator-api#v0.1.0",
+    "tauri-plugin-authenticator-api": "github:tauri-apps/tauri-plugin-authenticator-api#v0.1.0",
 ```
 
 Use within your JS/TS:
-```
+```ts
   import { Authenticator } from 'tauri-plugin-authenticator-api'
 ```
 
