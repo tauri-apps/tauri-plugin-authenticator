@@ -5,8 +5,8 @@
     "Tauri Programme within The Commons Conservancy"
   ],
   "description": "API wrapper for the Tauri Authenticator plugin",
-  "browser": "webview-dist/index.js",
-  "main": "webview-dist/index.js",
+  "browser": "webview-dist/index.min.js",
+  "module": "webview-dist/index.mjs",
   "types": "webview-dist/index.d.ts",
   "scripts": {
     "build": "rollup -c ./webview-src/rollup.config.js",
@@ -17,6 +17,7 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "13.0.6",
     "@rollup/plugin-typescript": "8.3.0",
+    "rollup": "^2.58.3",
     "rollup-plugin-terser": "7.0.2",
     "typescript": "4.4.4"
   },
