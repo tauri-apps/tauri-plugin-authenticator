@@ -1,9 +1,13 @@
 {
+  "package": {
+    "productName": "svelte-app",
+    "version": "0.1.0"
+  },
   "build": {
     "distDir": "../public",
-    "devPath": "http://localhost:5000",
-    "beforeDevCommand": "yarn dev",
-    "beforeBuildCommand": "yarn build"
+    "devPath": "http://localhost:8080",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
   },
   "tauri": {
     "bundle": {
@@ -31,8 +35,18 @@
         "frameworks": [],
         "minimumSystemVersion": "",
         "useBootstrapper": false,
-        "exceptionDomain": ""
+        "exceptionDomain": "",
+        "signingIdentity": null,
+        "entitlements": null
+      },
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
       }
+    },
+    "updater": {
+      "active": false
     },
     "allowlist": {
       "all": true
@@ -47,7 +61,7 @@
       }
     ],
     "security": {
-      "csp": "default-src blob: data: filesystem: ws: http: https: 'unsafe-eval' 'unsafe-inline'"
+      "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'"
     }
   }
 }
