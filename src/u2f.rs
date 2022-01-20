@@ -1,3 +1,7 @@
+// Copyright 2021 Tauri Programme within The Commons Conservancy
+// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
+
 use base64::{decode_config, encode_config, URL_SAFE_NO_PAD};
 use chrono::prelude::*;
 use serde_derive::Serialize;

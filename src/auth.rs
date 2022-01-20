@@ -1,3 +1,7 @@
+// Copyright 2021 Tauri Programme within The Commons Conservancy
+// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
+
 use authenticator::{
     authenticatorservice::AuthenticatorService, statecallback::StateCallback,
     AuthenticatorTransports, KeyHandle, RegisterFlags, SignFlags, StatusUpdate,
