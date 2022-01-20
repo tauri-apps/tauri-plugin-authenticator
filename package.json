@@ -5,9 +5,18 @@
     "Tauri Programme within The Commons Conservancy"
   ],
   "description": "API wrapper for the Tauri Authenticator plugin",
+  "type": "module",
   "browser": "webview-dist/index.min.js",
-  "module": "webview-dist/index.mjs",
   "types": "webview-dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./webview-dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "webview-dist"
+  ],
   "scripts": {
     "build": "rollup -c ./webview-src/rollup.config.js",
     "prepublishOnly": "yarn build",
