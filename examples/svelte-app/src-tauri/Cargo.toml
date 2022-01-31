@@ -5,16 +5,16 @@ description = "Authenticator Example App"
 authors = [ "Tauri Programme within The Commons Conservancy" ]
 license = ""
 repository = ""
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = [ "derive" ] }
-tauri = { version = "1.0.0-beta.5", features = ["api-all"] }
+tauri = { version = "1.0.0-beta.8", features = ["api-all"] }
 tauri-plugin-authenticator = { path = "../../../" }
 
 [build-dependencies]
-tauri-build = "1.0.0-beta.3"
+tauri-build = "1.0.0-beta.4"
 
 [features]
 default = [ "custom-protocol" ]
