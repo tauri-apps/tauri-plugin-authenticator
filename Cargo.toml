@@ -15,7 +15,7 @@ serde_derive = "1.0"
 sha2 = "0.10"
 async-std = { version = "1.10", features = ["attributes"] }
 base64 = { version = "^0.13" }
-anyhow = "1.0.53"
+anyhow = "1.0.54"
 u2f = "0.2"
 chrono = "0.4"
 tauri = "1.0.0-rc.3"
