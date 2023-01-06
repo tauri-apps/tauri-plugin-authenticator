@@ -1,37 +1,33 @@
 {
   "name": "tauri-plugin-authenticator-api",
-  "version": "0.1.0",
+  "version": "0.0.0",
+  "description": "Use hardware security-keys in your Tauri App.",
+  "license": "MIT or APACHE-2.0",
   "authors": [
     "Tauri Programme within The Commons Conservancy"
   ],
-  "description": "API wrapper for the Tauri Authenticator plugin",
   "type": "module",
-  "browser": "webview-dist/index.min.js",
-  "types": "webview-dist/index.d.ts",
+  "browser": "guest-js/dist/index.min.js",
+  "module": "guest-js/dist/index.mjs",
+  "types": "guest-js/dist/index.d.ts",
   "exports": {
-    ".": {
-      "import": "./webview-dist/index.mjs"
-    },
-    "./package.json": "./package.json"
+    "import": "./guest-js/dist/index.mjs",
+    "types": "./guest-js/dist/index.d.ts",
+    "browser": "./guest-js/dist/index.min.js"
+  },
+  "scripts": {
+    "build": "rollup -c"
   },
   "files": [
-    "webview-dist"
+    "guest-js/dist",
+    "!guest-js/dist/**/*.map",
+    "README.md",
+    "LICENSE"
   ],
-  "scripts": {
-    "build": "rollup -c ./webview-src/rollup.config.js",
-    "prepublishOnly": "yarn build",
-    "pretest": "yarn build"
-  },
-  "license": "Apache-2.0",
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "13.1.3",
-    "@rollup/plugin-typescript": "8.3.1",
-    "rollup": "2.68.0",
-    "rollup-plugin-terser": "7.0.2",
-    "typescript": "4.5.5"
+    "tslib": "^2.4.1"
   },
   "dependencies": {
-    "@tauri-apps/api": "1.0.0-rc.1",
-    "tslib": "2.3.1"
+    "@tauri-apps/api": "^1.2.0"
   }
 }

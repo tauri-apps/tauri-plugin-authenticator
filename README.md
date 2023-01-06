@@ -1,72 +1,108 @@
-# tauri-plugin-authenticator
-An official Tauri plugin for using a yubikey in your Tauri App
-# Tauri Plugin Authenticator
-![Test](https://github.com/tauri-apps/tauri-plugin-authenticator/workflows/Test/badge.svg)
+![plugin-authenticator](banner.png)
 
-This plugin provides a "classical" Tauri Plugin Interface to the wonderful mozilla [authenticator.rs](https://github.com/mozilla/authenticator-rs)
+Use hardware security-keys in your Tauri App.
 
-## Architecture
-This repo shape might appear to be strange, but it is really just a hybrid Rust / Typescript project that recommends a specific type of consumption, namely using GIT as the secure distribution mechanism, and referencing specific unforgeable git hashes. Of course, it can also be consumed via Cargo and NPM.
+## Install
 
-### `/src`
-Rust source code that contains the plugin definition and Authenticator features.
-
-### `/webview-src`
-Typescript source for the /dist folder that provides an API to interface with the rust code.
-
-### `/webview-dist`
-Tree-shakeable transpiled JS to be consumed in a WRY webview.
-
-### `/bindings`
-Forthcoming tauri bindings to other programming languages, like DENO.
-
-## Installation
 There are three general methods of installation that we can recommend.
-1. Pull sources directly from Github using git tags / revision hashes (most secure, good for developement, shown below)
-2. Git submodule install this repo in your tauri project and then use `file` protocol to ingest the source
-3. Use crates.io and npm (easiest, and requires you to trust that our publishing pipeline worked)
 
-For more details and usage see [the svelte demo](examples/svelte-app/src/App.svelte). Please note, below in the dependencies you can also lock to a revision/tag in both the `Cargo.toml` and `package.json`
+1. Use crates.io and npm (easiest, and requires you to trust that our publishing pipeline worked)
+2. Pull sources directly from Github using git tags / revision hashes (most secure)
+3. Git submodule install this repo in your tauri project and then use file protocol to ingest the source (most secure, but inconvenient to use)
 
-### RUST
+Install the Core plugin by adding the following to your `Cargo.toml` file:
+
 `src-tauri/Cargo.toml`
-```yaml
-[dependencies.tauri-plugin-authenticator]
-git = "https://github.com/tauri-apps/tauri-plugin-authenticator"
-tag = "v0.1.0"
-#branch = "main"
+
+```toml
+[dependencies]
+tauri-plugin-authenticator = "0.1"
+# or through git
+tauri-plugin-authenticator = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
 ```
 
-Use in `src-tauri/src/main.rs`:
-```rust
-use tauri_authenticator::TauriAuthenticator;
+You can install the JavaScript Guest bindings using your preferred JavaScript package manager:
 
+> Note: Since most JavaScript package managers are unable to install packages from git monorepos we provide read-only mirrors of each plugin. This makes installation option 2 more ergonomic to use.
+
+```sh
+pnpm add https://github.com/tauri-apps/tauri-plugin-authenticator
+# or
+npm add https://github.com/tauri-apps/tauri-plugin-authenticator
+# or
+yarn add https://github.com/tauri-apps/tauri-plugin-authenticator
+```
+
+## Usage
+
+First you need to register the core plugin with Tauri:
+
+`src-tauri/src/main.rs`
+
+```rust
 fn main() {
     tauri::Builder::default()
-        .plugin(TauriAuthenticator {})
-        .build()
-        .run();
+        .plugin(tauri_plugin_authenticator::init())
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
 ```
 
-### WEBVIEW
-`Install`
-```
-npm install github:tauri-apps/tauri-plugin-authenticator-api#v0.1.0
-# or
-yarn add github:tauri-apps/tauri-plugin-authenticator-api#v0.1.0
+Afterwards all the plugin's APIs are available through the JavaScript guest bindings:
+
+```javascript
+import { Authenticator } from "tauri-plugin-authenticator-api";
+
+const auth = new Authenticator();
+auth.init(); // initialize transports
+
+// generate a 32-bytes long random challenge
+const arr = new Uint32Array(32);
+window.crypto.getRandomValues(arr);
+const b64 = btoa(String.fromCharCode.apply(null, arr));
+// web-safe base64
+const challenge = b64.replace(/\+/g, "-").replace(/\//g, "_");
+
+const domain = "https://tauri.app";
+
+// attempt to register with the security key
+const json = await auth.register(challenge, domain);
+const registerResult = JSON.parse(json);
+
+// verify te registration was successfull
+const r2 = await auth.verifyRegistration(
+  challenge,
+  app,
+  registerResult.registerData,
+  registerResult.clientData
+);
+const j2 = JSON.parse(r2);
+
+// sign some data
+const json = await auth.sign(challenge, app, keyHandle);
+const signData = JSON.parse(json);
+
+// verify the signature again
+const counter = await auth.verifySignature(
+  challenge,
+  app,
+  signData.signData,
+  clientData,
+  keyHandle,
+  pubkey
+);
+
+if (counter && counter > 0) {
+  console.log("SUCCESS!");
+}
 ```
 
-`package.json`
-```json
-  "dependencies": {
-    "tauri-plugin-authenticator-api": "github:tauri-apps/tauri-plugin-authenticator-api#v0.1.0",
-```
+## Contributing
 
-Use within your JS/TS:
-```ts
-  import { Authenticator } from 'tauri-plugin-authenticator-api'
-```
+PRs accepted. Please make sure to read the Contributing Guide before making a pull request.
 
-# License
-MIT / Apache-2.0
+## License
+
+Code: (c) 2015 - Present - The Tauri Programme within The Commons Conservancy.
+
+MIT or MIT/Apache 2.0 where applicable.
