@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/tauri';
 
 class Authenticator {
     async init() {
-        return await invoke("plugin:authenticator|init");
+        return await invoke("plugin:authenticator|init_auth");
     }
     async register(challenge, application) {
         return await invoke("plugin:authenticator|register", {
