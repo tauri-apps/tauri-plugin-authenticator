@@ -1,3 +1,8 @@
+declare global {
+    interface Window {
+        __TAURI_INVOKE__: <T>(cmd: string, args?: unknown) => Promise<T>;
+    }
+}
 export declare class Authenticator {
     init(): Promise<void>;
     register(challenge: string, application: string): Promise<string>;
