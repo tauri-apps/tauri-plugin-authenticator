@@ -7,7 +7,7 @@ var core = require('@tauri-apps/api/core');
 // SPDX-License-Identifier: MIT
 class Authenticator {
     async init() {
-        return await core.invoke("plugin:authenticator|init_auth");
+        await core.invoke("plugin:authenticator|init_auth");
     }
     async register(challenge, application) {
         return await core.invoke("plugin:authenticator|register", {

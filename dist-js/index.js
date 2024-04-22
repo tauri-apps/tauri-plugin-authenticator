@@ -5,7 +5,7 @@ import { invoke } from '@tauri-apps/api/core';
 // SPDX-License-Identifier: MIT
 class Authenticator {
     async init() {
-        return await invoke("plugin:authenticator|init_auth");
+        await invoke("plugin:authenticator|init_auth");
     }
     async register(challenge, application) {
         return await invoke("plugin:authenticator|register", {
